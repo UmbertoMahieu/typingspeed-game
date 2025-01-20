@@ -1,6 +1,7 @@
 import tkinter as tk
 import csv
 from tkinter import font
+import datetime
 
 
 class TypingSpeedApp:
@@ -17,6 +18,8 @@ class TypingSpeedApp:
         self.correct_words = []
         self.wrong_words = []
         self.current_word = self.words_list[0]
+        self.start_game = None
+        self.stop_game = None
 
         self.display_words()
 
@@ -37,7 +40,7 @@ class TypingSpeedApp:
         self.canvas.create_window(250, 200, window=self.next_word_label)
 
         self.text_entry = tk.Entry(self.root, width=40)
-        self.canvas.create_window(250, 300, window=self.text_entry)
+        self.canvas.create_window(250, 325, window=self.text_entry)
         self.text_entry.bind("<space>", self.game_manager)
         self.text_entry.bind("<Return>", self.game_manager)
 
@@ -58,18 +61,35 @@ class TypingSpeedApp:
     def game_manager(self, event):
         if self.status == False:
             self.status = True
+            self.start_game = datetime.datetime.now().time().second
         typed_word = self.text_entry.get().strip()
         if typed_word == self.current_word:
             self.correct_words.append(typed_word)
         else:
             self.wrong_words.append(typed_word)
-        self.current_word = self.words_list[self.words_list.index(self.current_word) + 1]
-        self.display_words()
+        if self.current_word == self.words_list[len(self.words_list) - 1]:
+            self.status = False
+            self.stop_game = datetime.datetime.now().time().second
+            self.display_result()
+        else:
+            self.current_word = self.words_list[self.words_list.index(self.current_word) + 1]
+            self.display_words()
         self.text_entry.delete(0, tk.END)
+
+    def display_result(self):
+        game_duration = self.stop_game - self.start_game
+        self.canvas.create_text(250, 225, text=f"Nombre de mots tapés correctement : {len(self.correct_words)}", font=("Ariel", 10, "italic"))
+        self.canvas.create_text(250, 250, text=f"Nombre de mots tapés avec erreur : {len(self.wrong_words)}", font=("Ariel", 10, "italic"))
+        self.canvas.create_text(250, 275, text=f'Temps nécessaire pour taper correctement {len(self.correct_words)} mots : {game_duration} secondes', font=("Ariel", 10, "italic"))
+        self.canvas.create_text(250, 300, text=f'Nombre de mots/minutes : {len(self.correct_words)/game_duration * 60}', font=("Ariel", 10, "italic"))
+
 
     def display_words(self):
         self.current_word_label.config(text=self.current_word)
-        self.next_word_label.config(text=self.words_list[self.words_list.index(self.current_word) + 1])
+        if self.words_list.index(self.current_word) == len(self.words_list) -1:
+            self.next_word_label.config(text="")
+        else:
+            self.next_word_label.config(text=self.words_list[self.words_list.index(self.current_word) + 1])
 
 
 if __name__ == "__main__":
