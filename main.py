@@ -1,7 +1,7 @@
 import tkinter as tk
 import csv
 from tkinter import font
-import datetime
+import time
 
 
 class TypingSpeedApp:
@@ -61,15 +61,15 @@ class TypingSpeedApp:
     def game_manager(self, event):
         if self.status == False:
             self.status = True
-            self.start_game = datetime.datetime.now().time().second
+            self.start_game = time.time()
         typed_word = self.text_entry.get().strip()
         if typed_word == self.current_word:
             self.correct_words.append(typed_word)
         else:
             self.wrong_words.append(typed_word)
-        if self.current_word == self.words_list[len(self.words_list) - 1]:
+        if self.current_word == self.words_list[-1]:
             self.status = False
-            self.stop_game = datetime.datetime.now().time().second
+            self.stop_game = time.time()
             self.display_result()
         else:
             self.current_word = self.words_list[self.words_list.index(self.current_word) + 1]
@@ -77,16 +77,29 @@ class TypingSpeedApp:
         self.text_entry.delete(0, tk.END)
 
     def display_result(self):
-        game_duration = self.start_game - self.stop_game
+        game_duration = self.stop_game - self.start_game
         self.canvas.create_text(250, 225, text=f"Nombre de mots tapés correctement : {len(self.correct_words)}", font=("Ariel", 10, "italic"))
         self.canvas.create_text(250, 250, text=f"Nombre de mots tapés avec erreur : {len(self.wrong_words)}", font=("Ariel", 10, "italic"))
-        self.canvas.create_text(250, 275, text=f'Temps nécessaire pour taper correctement {len(self.correct_words)} mots : {game_duration} secondes', font=("Ariel", 10, "italic"))
-        self.canvas.create_text(250, 300, text=f'Nombre de mots/minutes : {len(self.correct_words)/game_duration * 60}', font=("Ariel", 10, "italic"))
+        self.canvas.create_text(250, 275, text=f'Temps nécessaire pour taper correctement {len(self.correct_words)} mots : {game_duration:.2f} secondes', font=("Ariel", 10, "italic"))
+        self.canvas.create_text(250, 300, text=f'Nombre de mots/minutes : {len(self.correct_words)/(game_duration / 60):.2f}', font=("Ariel", 10, "italic"))
+        self.start_button = tk.Button(self.root, text="Start over", command=self.start_new_game)
+        self.canvas.create_window(250, 50, window=self.start_button)
+
+    def start_new_game(self):
+        for widget in root.winfo_children():
+            widget.destroy()
+        self.correct_words = []
+        self.wrong_words = []
+        self.current_word = self.words_list[0]
+        self.status = False
+        self.setup_ui()
+        self.display_words()
+        self.text_entry.delete(0, tk.END)
 
 
     def display_words(self):
         self.current_word_label.config(text=self.current_word)
-        if self.words_list.index(self.current_word) == len(self.words_list) -1:
+        if self.current_word == self.words_list[-1]:
             self.next_word_label.config(text="")
         else:
             self.next_word_label.config(text=self.words_list[self.words_list.index(self.current_word) + 1])
