@@ -77,7 +77,7 @@ class TypingSpeedApp:
         self.text_entry.delete(0, tk.END)
 
     def display_result(self):
-        game_duration = self.stop_game - self.start_game
+        game_duration = self.start_game - self.stop_game
         self.canvas.create_text(250, 225, text=f"Nombre de mots tapés correctement : {len(self.correct_words)}", font=("Ariel", 10, "italic"))
         self.canvas.create_text(250, 250, text=f"Nombre de mots tapés avec erreur : {len(self.wrong_words)}", font=("Ariel", 10, "italic"))
         self.canvas.create_text(250, 275, text=f'Temps nécessaire pour taper correctement {len(self.correct_words)} mots : {game_duration} secondes', font=("Ariel", 10, "italic"))
